@@ -1,0 +1,265 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-flecha: var(--font-flecha);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01","ss02","cv01","cv02";
+}
+
+.input-bar {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  -webkit-tap-highlight-color: transparent;
+  line-height: inherit;
+  color: hsl(var(--foreground));
+  font-family: __Inter_f367f3,__Inter_Fallback_f367f3;
+  font-style: normal;
+  box-sizing: border-box;
+  border: 0 solid #e5e7eb;
+  scrollbar-width: thin;
+  scrollbar-color: #c9c6c5 transparent;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  border-radius: 1.5rem;
+  border-width: 1px;
+  --tw-border-opacity: 1;
+  border-color: rgb(229 224 223/var(--tw-border-opacity,1));
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255/var(--tw-bg-opacity,1));
+  padding: .75rem;
+  --tw-shadow: 0 1px 2px 0 rgba(0,0,0,.05);
+  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow);
+  transform: none;
+  transform-origin: 50% 50% 0px;
+  opacity: 1;
+}
+
+.usecase-card {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  font-weight: 400;
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+  border: 0 solid #e5e7eb;
+  scrollbar-width: thin;
+  scrollbar-color: #c9c6c5 transparent;
+  font-family: inherit;
+  letter-spacing: inherit;
+  margin: 0;
+  text-transform: none;
+  -webkit-appearance: button;
+  background-image: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  border-radius: 9999px;
+  border-width: 1px;
+  --tw-border-opacity: 1;
+  border-color: rgb(229 224 223/var(--tw-border-opacity,1));
+  --tw-bg-opacity: 1;
+  background-color: rgb(246 244 242/var(--tw-bg-opacity,1));
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: .5rem;
+  padding-bottom: .5rem;
+  font-size: 1rem;
+  line-height: 1.75rem;
+  --tw-text-opacity: 1;
+  color: rgb(114 111 111/var(--tw-text-opacity,1));
+  transition-property: all;
+  transition-timing-function: cubic-bezier(.4,0,.2,1);
+  transition-duration: .15s;
+  white-space: nowrap;
+}
+
+.usecase-card:hover {
+  background-color: rgb(243 240 238);
+}
+
+.usecase-container {
+  display: grid;
+  grid-template-columns: repeat(6, max-content);
+  gap: 0.5rem;
+  max-width: 80rem;
+  width: 100%;
+  margin: 1.5rem auto 0;
+  justify-items: center;
+  justify-content: center;
+}
+
+/* Single column layout for all screens 1100px and below */
+@media (max-width: 1100px) {
+  .usecase-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1.5rem auto 0;
+    max-width: 28rem;
+    align-items: center;
+  }
+  
+  .usecase-card {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .usecase-card:nth-child(1),
+  .usecase-card:nth-child(2),
+  .usecase-card:nth-child(3),
+  .usecase-card:nth-child(4),
+  .usecase-card:nth-child(5),
+  .usecase-card:nth-child(6) {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .usecase-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 2rem auto 0;
+    max-width: 20rem;
+    align-items: center;
+  }
+  
+  .usecase-card {
+    width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    justify-content: space-between;
+    align-items: center;
+    white-space: normal;
+  }
+  
+  .usecase-card:nth-child(1),
+  .usecase-card:nth-child(2),
+  .usecase-card:nth-child(3),
+  .usecase-card:nth-child(4),
+  .usecase-card:nth-child(5),
+  .usecase-card:nth-child(6) {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  
+  .usecase-card img {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+  }
+  
+  .input-bar {
+    padding: 0.75rem;
+  }
+}
+
+.usecase-card:nth-child(1) { grid-column: 1 / 3; }
+.usecase-card:nth-child(2) { grid-column: 3 / 5; }
+.usecase-card:nth-child(3) { grid-column: 5 / 7; }
+.usecase-card:nth-child(4) { grid-column: 2 / 4; grid-row: 2; }
+.usecase-card:nth-child(5) { grid-column: 4 / 6; grid-row: 2; }
+.usecase-card:nth-child(6) { grid-column: 3 / 5; grid-row: 3; }
+
+
+.animated-gradient {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  font-variation-settings: normal;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01","ss02","cv01","cv02";
+  text-rendering: optimizeLegibility;
+  --tw-bg-opacity: 1;
+  text-align: center;
+  font-family: "Indigo Antiqua 2 Bold Italic", Flecha, serif;
+  --tw-text-opacity: 1;
+  font-size: 2.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: #c9c6c5 transparent;
+  box-sizing: border-box;
+  border: 0 solid #e5e7eb;
+  border-color: hsl(var(--border));
+  user-select: text;
+  background-image: linear-gradient(90deg,#57534d,#57534d 33.33%,#3d348b 40%,#7678ed 45%,#f7b801 50%,#f18701 55%,#f35b04 60%,transparent 66.67%,transparent);
+  will-change: background-position;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  line-height: 1.2;
+  display: inline-block;
+  background-origin: content-box;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  background-size: 300% 100%;
+  animation: animateGradient 1s ease-out forwards;
+  padding-left: .25rem;
+  padding-right: .25rem;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -.025em;
+  background-position-x: 100%;
+  background-position-y: 0px;
+}
+
+@media (max-width: 640px) {
+  .animated-gradient {
+    font-size: 1.25rem;
+  }
+}
+
+@keyframes animateGradient {
+  0% {
+    background-position-x: 100%;
+  }
+  100% {
+    background-position-x: 0%;
+  }
+}
+
+/* Line clamp utilities for mobile */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-none {
+  display: block;
+  -webkit-line-clamp: none;
+  -webkit-box-orient: initial;
+  overflow: visible;
+}
