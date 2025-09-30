@@ -15,6 +15,7 @@ interface Toolkit {
 
 interface AuthConfig {
   id: string;
+  name: string;
   toolkit: string | { slug: string };
 }
 
@@ -123,9 +124,22 @@ function AppsPageContent({ user }: { user: User }) {
         setToolkits([]);
         return;
       }
+
+      // Filter auth configs to only include those with 'toolRouter' in their name
+      const toolRouterConfigs = authConfigsData.items.filter(config => 
+        config.name && config.name.toLowerCase().includes('toolrouter')
+      );
       
-      // Step 2: For each auth config, fetch the toolkit details
-      const appPromises = authConfigsData.items.map(async (authConfig) => {
+      console.log('Filtered toolRouter configs:', toolRouterConfigs);
+      
+      if (toolRouterConfigs.length === 0) {
+        console.log('No toolRouter auth configs found');
+        setToolkits([]);
+        return;
+      }
+      
+      // Step 2: For each filtered auth config, fetch the toolkit details
+      const appPromises = toolRouterConfigs.map(async (authConfig) => {
         try {
           // Handle both string and object formats for toolkit
           const toolkitSlug = typeof authConfig.toolkit === 'string' 
@@ -416,6 +430,8 @@ function AppsPageContent({ user }: { user: User }) {
                       <p className="text-neutral-600 text-xs sm:text-sm leading-relaxed break-words line-clamp-2 sm:line-clamp-none">
                         {toolkit.toolkit.meta.description}
                       </p>
+                      <div className="mt-1">
+                      </div>
                     </div>
                   </div>
                   <div className="flex-shrink-0 self-start sm:self-center">

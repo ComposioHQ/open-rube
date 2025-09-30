@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { openai } from "@ai-sdk/openai";
-import { generateText } from "ai";
-import { getComposioWithVercel } from '../../utils/composio';
+import { streamText, stepCountIs } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { experimental_createMCPClient as createMCPClient } from 'ai';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { createClient } from '@/app/utils/supabase/server';
 import { 
   createConversation, 
   addMessage, 
   generateConversationTitle
 } from '@/app/utils/chat-history';
+import { getComposio } from "@/app/utils/composio";
+
+// Session cache to store MCP sessions per chat session per user
+const sessionCache = new Map<string, { session: any, client: any, tools: any }>();
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -66,28 +72,66 @@ export async function POST(request: NextRequest) {
       'user'
     );
 
-    const composio = getComposioWithVercel();
-    const tools = await composio.tools.get(userEmail, {
-      tools: ['GMAIL_FETCH_EMAILS']
-    });
+    console.log('🚀 Starting Tool Router Agent execution...');
 
-    const response = await generateText({
-      model: openai("gpt-4"), 
-      messages: messages,
-      tools: tools,
-    });
+    // Create a unique session key based on user and conversation
+    const sessionKey = `${user.id}-${currentConversationId}`;
     
-    // Save assistant response to database
-    await addMessage(
-      currentConversationId,
-      user.id,
-      response.text,
-      'assistant'
-    );
+    let mcpClient, tools;
 
-    return NextResponse.json({
-      response: response.text,
-      conversationId: currentConversationId
+    // Check if we have a cached session for this chat
+    if (sessionCache.has(sessionKey)) {
+      console.log('♻️ Reusing existing MCP session');
+      const cached = sessionCache.get(sessionKey)!;
+      mcpClient = cached.client;
+      tools = cached.tools;
+    } else {
+      console.log('🆕 Creating new MCP session');
+      const composio = getComposio();
+
+      // Access the experimental ToolRouter for specific toolkits
+      const mcpSession = await composio.experimental.toolRouter.createSession(userEmail, {
+        toolkits: []
+      });
+      const url = new URL(mcpSession.url);
+      console.log(`🔗 Session URL: ${url}`);
+
+      mcpClient = await createMCPClient({
+        transport: new StreamableHTTPClientTransport(url, {
+          sessionId: mcpSession.sessionId,
+        }),
+      });
+
+      tools = await mcpClient.tools();
+      
+      // Cache the session, client, and tools for this chat
+      sessionCache.set(sessionKey, { session: mcpSession, client: mcpClient, tools });
+    }
+
+    const result = await streamText({
+      model: openai('gpt-4.1'),
+      tools,
+      messages: messages,
+      stopWhen: stepCountIs(50),
+      onStepFinish: (event: any) => {
+        console.log('Step finished:', event);
+      },
+      onFinish: async (event) => {
+        // Save assistant response to database when streaming finishes
+        await addMessage(
+          currentConversationId,
+          user.id,
+          event.text,
+          'assistant'
+        );
+      },
+    });
+
+    // Return streaming response
+    return result.toTextStreamResponse({
+      headers: {
+        'X-Conversation-Id': currentConversationId,
+      },
     });
   } catch (error) {
     console.error('Error in chat endpoint:', error);

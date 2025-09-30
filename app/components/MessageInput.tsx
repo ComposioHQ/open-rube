@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyboardEvent } from 'react';
+import { KeyboardEvent, useState, useEffect } from 'react';
 
 interface MessageInputProps {
   value: string;
@@ -17,6 +17,27 @@ export function MessageInput({
   placeholder, 
   isLoading 
 }: MessageInputProps) {
+  const placeholderSuggestions = [
+    "Hey Rube, can you fetch my emails",
+    "Hey Rube, can you search my twitter",
+    "Hey Rube, can you fetch the reddit posts in r/localllama"
+  ];
+
+  const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
+  const [displayPlaceholder, setDisplayPlaceholder] = useState(placeholderSuggestions[0]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPlaceholderIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % placeholderSuggestions.length;
+        setDisplayPlaceholder(placeholderSuggestions[nextIndex]);
+        return nextIndex;
+      });
+    }, 3000); // Change every 3 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -33,7 +54,7 @@ export function MessageInput({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           className="m-1 w-full resize-none border-0 bg-transparent px-2 sm:px-3 py-2 text-sm sm:text-base leading-relaxed text-gray-900 focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
-          placeholder={placeholder}
+          placeholder={displayPlaceholder}
         />
       </div>
       <div className="flex w-full items-center justify-between gap-1 pt-2">

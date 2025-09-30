@@ -59,7 +59,7 @@ export default function Home() {
         <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#fcfaf9' }}>
           <header className="bg-white border-b border-gray-200">
             <div className="flex items-center justify-between px-6 py-4">
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 text-black">
                 <RubeGraphic />
                 <span className="text-xl font-semibold text-gray-900">Rube</span>
               </div>

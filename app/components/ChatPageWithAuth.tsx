@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { RubeGraphic } from './RubeGraphic';
 import { MessageInput } from './MessageInput';
 import { AuthWrapper } from './AuthWrapper';
 import { createClient } from '@/app/utils/supabase/client';
 import { User } from '@supabase/supabase-js';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
   id: string;
@@ -64,6 +66,19 @@ function ChatPageContent({ user }: { user: User }) {
     }
   };
 
+  const [streamingContent, setStreamingContent] = useState('');
+  const [currentStreamingId, setCurrentStreamingId] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Auto-scroll when messages change or streaming content updates
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, streamingContent]);
+
   const startNewChat = () => {
     setMessages([]);
     setCurrentConversationId(null);
@@ -82,6 +97,7 @@ function ChatPageContent({ user }: { user: User }) {
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
+    setStreamingContent('');
 
     try {
       // Prepare messages for the chat API (include conversation history)
@@ -90,7 +106,7 @@ function ChatPageContent({ user }: { user: User }) {
         content: msg.content
       }));
 
-      // Call the actual chat API
+      // Call the streaming chat API
       const chatResponse = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -104,22 +120,44 @@ function ChatPageContent({ user }: { user: User }) {
         throw new Error(`Chat API error: ${chatResponse.status}`);
       }
 
-      const responseData = await chatResponse.json();
+      // Get conversation ID from headers
+      const newConversationId = chatResponse.headers.get('X-Conversation-Id');
+      if (!currentConversationId && newConversationId) {
+        setCurrentConversationId(newConversationId);
+        loadConversations(); // Refresh conversations list
+      }
+
+      // Handle streaming response
+      const reader = chatResponse.body?.getReader();
+      const decoder = new TextDecoder();
+      const streamingId = (Date.now() + 1).toString();
+      setCurrentStreamingId(streamingId);
       
+      let fullContent = '';
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          fullContent += chunk;
+          setStreamingContent(fullContent);
+        }
+      }
+
+      // Add the complete message
       const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: responseData.response || 'Sorry, I could not process your request.',
+        id: streamingId,
+        content: fullContent || 'Sorry, I could not process your request.',
         sender: 'assistant',
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, assistantMessage]);
+      setStreamingContent('');
+      setCurrentStreamingId(null);
       
-      // Update current conversation ID if it's a new conversation
-      if (!currentConversationId && responseData.conversationId) {
-        setCurrentConversationId(responseData.conversationId);
-        loadConversations(); // Refresh conversations list
-      }
     } catch (error) {
       console.error('Error calling chat API:', error);
       
@@ -131,6 +169,8 @@ function ChatPageContent({ user }: { user: User }) {
       };
       
       setMessages(prev => [...prev, errorMessage]);
+      setStreamingContent('');
+      setCurrentStreamingId(null);
     } finally {
       setIsLoading(false);
     }
@@ -278,12 +318,144 @@ function ChatPageContent({ user }: { user: User }) {
                 {messages.map((message) => (
                   <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[80%] ${message.sender === 'user' ? 'bg-stone-200 text-black' : 'text-black'} rounded-lg p-3`} style={message.sender === 'assistant' ? { backgroundColor: '#fcfaf9' } : {}}>
-                      <p className="text-sm leading-relaxed">{message.content}</p>
+                      {message.sender === 'assistant' ? (
+                        <div className="prose prose-sm max-w-none text-black prose-headings:text-black prose-strong:text-black prose-code:text-black prose-pre:bg-gray-100">
+                          <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                            pre: ({ children, ...props }) => (
+                              <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm" {...props}>
+                                {children}
+                              </pre>
+                            ),
+                            code: ({ children, className, ...props }) => {
+                              const isInline = !className;
+                              if (isInline) {
+                                return (
+                                  <code className="bg-gray-100 px-1 py-0.5 rounded text-sm" {...props}>
+                                    {children}
+                                  </code>
+                                );
+                              }
+                              return (
+                                <code className={className} {...props}>
+                                  {children}
+                                </code>
+                              );
+                            },
+                            h1: ({ children, ...props }) => (
+                              <h1 className="text-lg font-bold mb-2 text-black" {...props}>
+                                {children}
+                              </h1>
+                            ),
+                            h2: ({ children, ...props }) => (
+                              <h2 className="text-base font-semibold mb-2 text-black" {...props}>
+                                {children}
+                              </h2>
+                            ),
+                            ul: ({ children, ...props }) => (
+                              <ul className="list-disc list-inside space-y-1" {...props}>
+                                {children}
+                              </ul>
+                            ),
+                            ol: ({ children, ...props }) => (
+                              <ol className="list-decimal list-inside space-y-1" {...props}>
+                                {children}
+                              </ol>
+                            ),
+                            a: ({ children, href, ...props }) => (
+                              <a 
+                                href={href} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="underline text-blue-600 hover:text-blue-800" 
+                                {...props}
+                              >
+                                {children}
+                              </a>
+                            ),
+                            }}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p className="text-sm leading-relaxed">{message.content}</p>
+                      )}
                     </div>
                   </div>
                 ))}
                 
-                {isLoading && (
+                {/* Show streaming content */}
+                {currentStreamingId && streamingContent && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[80%] text-black rounded-lg p-3" style={{ backgroundColor: '#fcfaf9' }}>
+                      <div className="prose prose-sm max-w-none text-black prose-headings:text-black prose-strong:text-black prose-code:text-black prose-pre:bg-gray-100">
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                          pre: ({ children, ...props }) => (
+                            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm" {...props}>
+                              {children}
+                            </pre>
+                          ),
+                          code: ({ children, className, ...props }) => {
+                            const isInline = !className;
+                            if (isInline) {
+                              return (
+                                <code className="bg-gray-100 px-1 py-0.5 rounded text-sm" {...props}>
+                                  {children}
+                                </code>
+                              );
+                            }
+                            return (
+                              <code className={className} {...props}>
+                                {children}
+                              </code>
+                            );
+                          },
+                          h1: ({ children, ...props }) => (
+                            <h1 className="text-lg font-bold mb-2 text-black" {...props}>
+                              {children}
+                            </h1>
+                          ),
+                          h2: ({ children, ...props }) => (
+                            <h2 className="text-base font-semibold mb-2 text-black" {...props}>
+                              {children}
+                            </h2>
+                          ),
+                          ul: ({ children, ...props }) => (
+                            <ul className="list-disc list-inside space-y-1" {...props}>
+                              {children}
+                            </ul>
+                          ),
+                          ol: ({ children, ...props }) => (
+                            <ol className="list-decimal list-inside space-y-1" {...props}>
+                              {children}
+                            </ol>
+                          ),
+                          a: ({ children, href, ...props }) => (
+                            <a 
+                              href={href} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="underline text-blue-600 hover:text-blue-800" 
+                              {...props}
+                            >
+                              {children}
+                            </a>
+                          ),
+                          }}
+                        >
+                          {streamingContent}
+                        </ReactMarkdown>
+                      </div>
+                      <div className="inline-block w-2 h-4 bg-gray-600 animate-pulse ml-1"></div>
+                    </div>
+                  </div>
+                )}
+                
+                {isLoading && !currentStreamingId && (
                   <div className="flex justify-start">
                     <div className="rounded-lg p-3" style={{ backgroundColor: '#fcfaf9' }}>
                       <div className="flex items-center gap-2">
@@ -299,6 +471,9 @@ function ChatPageContent({ user }: { user: User }) {
                     </div>
                   </div>
                 )}
+                
+                {/* Auto-scroll target */}
+                <div ref={messagesEndRef} />
               </div>
             </div>
           )}

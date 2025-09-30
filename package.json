@@ -11,14 +11,18 @@
   "dependencies": {
     "@ai-sdk/openai": "^2.0.35",
     "@composio/vercel": "^0.2.8",
+    "@modelcontextprotocol/sdk": "^1.18.2",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.58.0",
-    "ai": "^5.0.52",
+    "@tailwindcss/typography": "^0.5.19",
+    "ai": "^5.0.59",
     "next": "15.5.4",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
