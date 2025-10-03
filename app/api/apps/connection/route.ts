@@ -23,14 +23,20 @@ export async function GET(request: NextRequest) {
       userIds: [user.email]
     });
 
-    console.log('Connected accounts for user:', user.email, connectedAccounts);
+    console.log('Connected accounts for user:', user.email, `(${connectedAccounts.items?.length || 0} accounts)`);
 
     // Get detailed info for each connected account
     const detailedAccounts = await Promise.all(
       (connectedAccounts.items || []).map(async (account) => {
         try {
           const accountDetails = await composio.connectedAccounts.get(account.id);
-          console.log('Account details for', account.id, ':', JSON.stringify(accountDetails, null, 2));
+          // Log only essential info without sensitive data
+          console.log('Account details for', account.id, ':', {
+            toolkit: accountDetails.toolkit?.slug,
+            connectionId: accountDetails.id,
+            authConfigId: accountDetails.authConfig?.id,
+            status: accountDetails.status
+          });
           return accountDetails;
         } catch (error) {
           console.error('Error fetching account details for', account.id, ':', error);

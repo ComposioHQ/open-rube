@@ -113,8 +113,8 @@ function AppsPageContent({ user }: { user: User }) {
         ? await connectionStatusResponse.json() 
         : { connectedAccounts: [] };
       
-      console.log('Received auth configs:', authConfigsData);
-      console.log('Received connection data:', connectionData);
+      console.log('Received auth configs:', authConfigsData.items?.length || 0, 'items');
+      console.log('Received connection data:', connectionData.connectedAccounts?.length || 0, 'accounts');
       
       // Store connected accounts for use in connection status
       setConnectedAccounts(connectionData.connectedAccounts || []);
@@ -285,11 +285,7 @@ function AppsPageContent({ user }: { user: User }) {
     
     // Debug logging
     console.log('Checking connection for toolkit:', toolkit.toolkit.slug);
-    console.log('Available connected accounts:', connectedAccounts.map(acc => ({ 
-      id: acc.id, 
-      toolkitSlug: acc.toolkit?.slug,
-      status: acc.status 
-    })));
+    console.log('Available connected accounts:', connectedAccounts.length, 'accounts');
     
     // Check if this toolkit is connected by looking for a connected account with matching toolkit slug
     const isConnected = connectedAccounts.some(account => 
@@ -360,12 +356,12 @@ function AppsPageContent({ user }: { user: User }) {
   }
 
   return (
-    <div className="flex-1" style={{ backgroundColor: '#fcfaf9' }}>
-      <div className="max-w-6xl mx-auto px-3 py-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-8 gap-3 sm:gap-4">
-          <h1 className="text-lg sm:text-2xl font-semibold text-neutral-700">Your Apps</h1>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
-            <div className="relative order-2 sm:order-1">
+    <div className="flex-1 flex flex-col" style={{ backgroundColor: '#fcfaf9' }}>
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-6xl mx-auto px-3 py-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-8 gap-3 sm:gap-4">
+            <h1 className="text-lg sm:text-2xl font-semibold text-neutral-700">Your Apps</h1>
+            <div className="relative">
               <svg className="w-4 h-4 sm:w-5 sm:h-5 absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -377,72 +373,66 @@ function AppsPageContent({ user }: { user: User }) {
                 className="w-full sm:w-auto pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 border border-stone-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-neutral-400 focus:border-transparent outline-none text-sm bg-white text-neutral-700"
               />
             </div>
-            <button className="bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-medium px-4 py-2 rounded-lg flex items-center justify-center gap-2 order-1 sm:order-2 transition-colors">
-              <span className="text-xs sm:text-sm">Browse Tools</span>
-              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
+          </div>
+
+          <div className="mb-3 sm:mb-6">
+            <button
+              onClick={() => setShowConnected(!showConnected)}
+              className="text-neutral-600 hover:text-neutral-800 text-xs sm:text-sm font-medium"
+            >
+              Show Connected Apps ({connectedAccounts.length})
             </button>
           </div>
-        </div>
 
-        <div className="mb-3 sm:mb-6">
-          <button
-            onClick={() => setShowConnected(!showConnected)}
-            className="text-neutral-600 hover:text-neutral-800 text-xs sm:text-sm font-medium"
-          >
-            Show Connected Apps ({connectedAccounts.length})
-          </button>
-        </div>
-
-        <div className="bg-white rounded-lg sm:rounded-xl border border-stone-200" style={{ boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)' }}>
-          {filteredToolkits.length === 0 ? (
-            <div className="p-6 sm:p-12 text-center">
-              <div className="text-neutral-500 text-sm sm:text-base">No toolkits found</div>
-            </div>
-          ) : (
-            <div className="divide-y divide-stone-200">
-              {filteredToolkits.map((toolkit: ConnectedToolkit) => (
-                <div key={`${toolkit.toolkit.slug}-${toolkit.authConfig.id}`} className="p-3 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-stone-50 transition-colors gap-3 sm:gap-0">
-                  <div className="flex items-start sm:items-center gap-2.5 sm:gap-4 min-w-0 flex-1">
-                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-white border border-gray-200 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0">
-                      {toolkit.toolkit.meta.logo ? (
-                        <img 
-                          src={toolkit.toolkit.meta.logo} 
-                          alt={toolkit.toolkit.name} 
-                          className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
-                          onError={(e) => {
-                            // Fallback to letter initial if logo fails to load
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                            target.nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                      ) : null}
-                      <span className={`text-orange-500 text-sm sm:text-lg font-semibold ${toolkit.toolkit.meta.logo ? 'hidden' : ''}`}>
-                        {getInitial(toolkit.toolkit.name)}
-                      </span>
+          <div className="bg-white rounded-lg sm:rounded-xl border border-stone-200 mb-6" style={{ boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)' }}>
+            {filteredToolkits.length === 0 ? (
+              <div className="p-6 sm:p-12 text-center">
+                <div className="text-neutral-500 text-sm sm:text-base">No toolkits found</div>
+              </div>
+            ) : (
+              <div className="divide-y divide-stone-200">
+                {filteredToolkits.map((toolkit: ConnectedToolkit) => (
+                  <div key={`${toolkit.toolkit.slug}-${toolkit.authConfig.id}`} className="p-3 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-stone-50 transition-colors gap-3 sm:gap-0">
+                    <div className="flex items-start sm:items-center gap-2.5 sm:gap-4 min-w-0 flex-1">
+                      <div className="w-8 h-8 sm:w-12 sm:h-12 bg-white border border-gray-200 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0">
+                        {toolkit.toolkit.meta.logo ? (
+                          <img
+                            src={toolkit.toolkit.meta.logo}
+                            alt={toolkit.toolkit.name}
+                            className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
+                            onError={(e) => {
+                              // Fallback to letter initial if logo fails to load
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              target.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        <span className={`text-orange-500 text-sm sm:text-lg font-semibold ${toolkit.toolkit.meta.logo ? 'hidden' : ''}`}>
+                          {getInitial(toolkit.toolkit.name)}
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-sm sm:text-lg font-semibold text-neutral-900 mb-0.5 sm:mb-1">
+                          {toolkit.toolkit.name}
+                        </h3>
+                        <p className="text-neutral-600 text-xs sm:text-sm leading-relaxed break-words line-clamp-2 sm:line-clamp-none">
+                          {toolkit.toolkit.meta.description}
+                        </p>
+                        <div className="mt-1">
+                        </div>
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-sm sm:text-lg font-semibold text-neutral-900 mb-0.5 sm:mb-1">
-                        {toolkit.toolkit.name}
-                      </h3>
-                      <p className="text-neutral-600 text-xs sm:text-sm leading-relaxed break-words line-clamp-2 sm:line-clamp-none">
-                        {toolkit.toolkit.meta.description}
-                      </p>
-                      <div className="mt-1">
+                    <div className="flex-shrink-0 self-start sm:self-center">
+                      <div className="text-xs sm:text-sm">
+                        {getActionButton(toolkit)}
                       </div>
                     </div>
                   </div>
-                  <div className="flex-shrink-0 self-start sm:self-center">
-                    <div className="text-xs sm:text-sm">
-                      {getActionButton(toolkit)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
