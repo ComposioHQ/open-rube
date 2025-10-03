@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from '@/app/utils/supabase/client'
+import { RubeGraphic } from '@/app/components/RubeGraphic'
 
 export default function AuthPage() {
   const supabase = createClient()
@@ -23,9 +24,7 @@ export default function AuthPage() {
         {/* Logo */}
         <div className="text-center">
           <div className="flex justify-center mb-8">
-            <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center">
-              <div className="text-white font-bold text-xl">///</div>
-            </div>
+            <RubeGraphic className="h-20 w-20 text-gray-800" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">
             Sign in to Rube by Composio
@@ -46,14 +45,6 @@ export default function AuthPage() {
             </svg>
             Continue with Google
           </button>
-        </div>
-
-        {/* Sign up link */}
-        <div className="text-center text-sm">
-          <span className="text-gray-600">Don't have an account? </span>
-          <span className="text-orange-500 font-medium cursor-pointer hover:text-orange-600">
-            Sign up
-          </span>
         </div>
       </div>
     </div>
