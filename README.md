@@ -238,6 +238,3 @@ This project is open source and available under the MIT License.
 - Inspired by [Rube](https://rube.app)
 - Powered by OpenAI's GPT-5
 
----
-
-Made with love by the Open Rube community
