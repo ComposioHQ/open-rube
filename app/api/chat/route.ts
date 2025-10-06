@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await streamText({
-      model: openai('gpt-4.1'),
+      model: openai('gpt-5'),
       tools,
       messages: messages,
       stopWhen: stepCountIs(50),
