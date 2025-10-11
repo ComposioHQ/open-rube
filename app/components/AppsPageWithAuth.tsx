@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { AuthWrapper } from './AuthWrapper';
 import { User } from '@supabase/supabase-js';
 
@@ -396,9 +397,11 @@ function AppsPageContent({ user }: { user: User }) {
                     <div className="flex items-start sm:items-center gap-2.5 sm:gap-4 min-w-0 flex-1">
                       <div className="w-8 h-8 sm:w-12 sm:h-12 bg-white border border-gray-200 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0">
                         {toolkit.toolkit.meta.logo ? (
-                          <img
+                          <Image
                             src={toolkit.toolkit.meta.logo}
                             alt={toolkit.toolkit.name}
+                            width={32}
+                            height={32}
                             className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
                             onError={(e) => {
                               // Fallback to letter initial if logo fails to load
