@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.20",
     "@ai-sdk/openai": "^2.0.35",
     "@composio/vercel": "^0.2.8",
     "@modelcontextprotocol/sdk": "^1.18.2",

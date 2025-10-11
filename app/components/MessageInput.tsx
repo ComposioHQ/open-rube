@@ -36,7 +36,7 @@ export function MessageInput({
     }, 3000); // Change every 3 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [placeholderSuggestions]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {

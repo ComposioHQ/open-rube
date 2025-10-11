@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 
-export default function AppsCallbackPage() {
+function AppsCallback() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -78,5 +78,13 @@ export default function AppsCallbackPage() {
         <p className="text-gray-600">Processing connection...</p>
       </div>
     </div>
+  )
+}
+
+export default function AppsCallbackPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AppsCallback />
+    </Suspense>
   )
 }

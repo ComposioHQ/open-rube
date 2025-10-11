@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { streamText, stepCountIs } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { google } from '@ai-sdk/google';
 import { experimental_createMCPClient as createMCPClient } from 'ai';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { createClient } from '@/app/utils/supabase/server';
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await streamText({
-      model: openai('gpt-5'),
+      model: google('gemini-flash-latest'),
       tools,
       messages: messages,
       stopWhen: stepCountIs(50),

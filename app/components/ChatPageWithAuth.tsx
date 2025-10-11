@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { RubeGraphic } from './RubeGraphic';
 import { MessageInput } from './MessageInput';
 import { AuthWrapper } from './AuthWrapper';
@@ -281,26 +282,26 @@ function ChatPageContent({ user }: { user: User }) {
                 <div className="usecase-container px-2">
                   <button onClick={() => handleSendMessage("What's the latest in Slack?")} className="usecase-card justify-start">
                     <span>What's the latest in Slack?</span>
-                    <img src="https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/slack.svg" alt="Slack" className="h-6 w-6 rounded object-contain" />
+                    <Image src="https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/slack.svg" alt="Slack" width={24} height={24} className="h-6 w-6 rounded object-contain" />
                   </button>
                   <button onClick={() => handleSendMessage("Look at Github PRs and update Linear")} className="usecase-card justify-start">
                     <span>Look at Github PRs and update Linear</span>
                     <div className="flex items-center gap-1">
-                      <img src="https://logos.composio.dev/api/github" alt="GitHub" className="h-5 w-5 rounded object-contain flex-shrink-0" />
-                      <img src="https://logos.composio.dev/api/linear" alt="Linear" className="h-5 w-5 rounded object-contain flex-shrink-0" />
+                      <Image src="https://logos.composio.dev/api/github" alt="GitHub" width={20} height={20} className="h-5 w-5 rounded object-contain flex-shrink-0" />
+                      <Image src="https://logos.composio.dev/api/linear" alt="Linear" width={20} height={20} className="h-5 w-5 rounded object-contain flex-shrink-0" />
                     </div>
                   </button>
                   <button onClick={() => handleSendMessage("Get urgent items from my inbox")} className="usecase-card justify-start">
                     <span>Get urgent items from my inbox</span>
-                    <img src="https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/gmail.svg" alt="Gmail" className="h-7 w-7 rounded object-contain" />
+                    <Image src="https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/gmail.svg" alt="Gmail" width={28} height={28} className="h-7 w-7 rounded object-contain" />
                   </button>
                   <button onClick={() => handleSendMessage("Find an empty slot and schedule event")} className="usecase-card justify-start">
                     <span>Find an empty slot and schedule event</span>
-                    <img src="https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/google-calendar.svg" alt="Calendar" className="h-7 w-7 rounded object-contain" />
+                    <Image src="https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/google-calendar.svg" alt="Calendar" width={28} height={28} className="h-7 w-7 rounded object-contain" />
                   </button>
                   <button onClick={() => handleSendMessage("Analyze competitors on Reddit")} className="usecase-card justify-start">
                     <span>Analyze competitors on Reddit</span>
-                    <img src="https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/reddit.svg" alt="Reddit" className="h-7 w-7 rounded object-contain" />
+                    <Image src="https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/reddit.svg" alt="Reddit" width={28} height={28} className="h-7 w-7 rounded object-contain" />
                   </button>
                   <button onClick={() => handleSendMessage("Discover more usecases")} className="usecase-card justify-start">
                     <span>Discover more usecases</span>
