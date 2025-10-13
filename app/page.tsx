@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { RubeGraphic } from './components/RubeGraphic';
 import { Navigation } from './components/Navigation';
@@ -9,7 +9,7 @@ import { AppsPage } from './components/AppsPageWithAuth';
 import { AuthWrapper } from './components/AuthWrapper';
 import { UserMenu } from './components/UserMenu';
 
-export default function Home() {
+function HomeContent() {
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState('chat');
 
@@ -74,5 +74,17 @@ export default function Home() {
         </div>
       )}
     </AuthWrapper>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#fcfaf9' }}>
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500"></div>
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 }

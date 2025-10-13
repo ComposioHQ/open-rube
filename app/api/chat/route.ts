@@ -11,8 +11,15 @@ import {
 } from '@/app/utils/chat-history';
 import { getComposio } from "@/app/utils/composio";
 
+interface MCPSessionCache {
+  session: { url: string; sessionId: string };
+  client: Awaited<ReturnType<typeof createMCPClient>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tools: any;
+}
+
 // Session cache to store MCP sessions per chat session per user
-const sessionCache = new Map<string, { session: any, client: any, tools: any }>();
+const sessionCache = new Map<string, MCPSessionCache>();
 
 
 export async function POST(request: NextRequest) {
@@ -109,11 +116,29 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await streamText({
-      model: openai('gpt-5'),
+      model: openai('gpt-4.1'),
       tools,
+      system: `You are a helpful AI assistant called Rube that can interact with 500+ applications through Composio's Tool Router.
+
+            When responding to users:
+            - Always format your responses using Markdown syntax
+            - Use **bold** for emphasis and important points
+            - Use bullet points and numbered lists for clarity
+            - Format links as [text](url) so they are clickable
+            - Use code blocks with \`\`\` for code snippets
+            - Use inline code with \` for commands, file names, and technical terms
+            - Use headings (##, ###) to organize longer responses
+            - Make your responses clear, concise, and well-structured
+
+            When executing actions:
+            - Explain what you're doing before using tools
+            - Provide clear feedback about the results
+            - Include relevant links when appropriate
+            
+          `,
       messages: messages,
       stopWhen: stepCountIs(50),
-      onStepFinish: (event: any) => {
+      onStepFinish: (event) => {
         console.log('Step finished:', event);
       },
       onFinish: async (event) => {

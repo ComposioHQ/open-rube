@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 
-export default function AppsCallbackPage() {
+function AppsCallbackContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -78,5 +78,20 @@ export default function AppsCallbackPage() {
         <p className="text-gray-600">Processing connection...</p>
       </div>
     </div>
+  )
+}
+
+export default function AppsCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#fcfaf9' }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <AppsCallbackContent />
+    </Suspense>
   )
 }

@@ -52,7 +52,7 @@ function ChatPageContent({ user }: { user: User }) {
       const response = await fetch(`/api/conversations/${conversationId}/messages`);
       if (response.ok) {
         const data = await response.json();
-        const formattedMessages = data.messages.map((msg: any) => ({
+        const formattedMessages = data.messages.map((msg: { id: string; content: string; role: string; created_at: string }) => ({
           id: msg.id,
           content: msg.content,
           sender: msg.role === 'user' ? 'user' : 'assistant',
@@ -280,7 +280,7 @@ function ChatPageContent({ user }: { user: User }) {
 
                 <div className="usecase-container px-2">
                   <button onClick={() => handleSendMessage("What's the latest in Slack?")} className="usecase-card justify-start">
-                    <span>What's the latest in Slack?</span>
+                    <span>What&apos;s the latest in Slack?</span>
                     <img src="https://cdn.jsdelivr.net/gh/ComposioHQ/open-logos@master/slack.svg" alt="Slack" className="h-6 w-6 rounded object-contain" />
                   </button>
                   <button onClick={() => handleSendMessage("Look at Github PRs and update Linear")} className="usecase-card justify-start">
@@ -319,7 +319,7 @@ function ChatPageContent({ user }: { user: User }) {
                   <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[80%] ${message.sender === 'user' ? 'bg-stone-200 text-black' : 'text-black'} rounded-lg p-3`} style={message.sender === 'assistant' ? { backgroundColor: '#fcfaf9' } : {}}>
                       {message.sender === 'assistant' ? (
-                        <div className="prose prose-sm max-w-none text-black prose-headings:text-black prose-strong:text-black prose-code:text-black prose-pre:bg-gray-100">
+                        <div className="prose prose-sm max-w-none text-black prose-headings:text-black prose-strong:text-black prose-code:text-black prose-pre:bg-gray-100 prose-a:text-blue-600 prose-a:underline prose-a:font-normal hover:prose-a:text-blue-800">
                           <ReactMarkdown 
                             remarkPlugins={[remarkGfm]}
                             components={{
@@ -390,7 +390,7 @@ function ChatPageContent({ user }: { user: User }) {
                 {currentStreamingId && streamingContent && (
                   <div className="flex justify-start">
                     <div className="max-w-[80%] text-black rounded-lg p-3" style={{ backgroundColor: '#fcfaf9' }}>
-                      <div className="prose prose-sm max-w-none text-black prose-headings:text-black prose-strong:text-black prose-code:text-black prose-pre:bg-gray-100">
+                      <div className="prose prose-sm max-w-none text-black prose-headings:text-black prose-strong:text-black prose-code:text-black prose-pre:bg-gray-100 prose-a:text-blue-600 prose-a:underline prose-a:font-normal hover:prose-a:text-blue-800">
                         <ReactMarkdown 
                           remarkPlugins={[remarkGfm]}
                           components={{
