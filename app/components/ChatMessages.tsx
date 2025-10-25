@@ -51,7 +51,7 @@ export function ChatMessages({
               {message.sender === 'assistant' ? (
                 <MarkdownContent content={message.content} />
               ) : (
-                <p className="text-sm leading-relaxed">{message.content}</p>
+                <p className="font-inter text-sm leading-relaxed">{message.content}</p>
               )}
             </div>
           </div>

@@ -38,7 +38,7 @@ interface ConnectedAccount {
   updatedAt: string;
 }
 
-function AppsPageContent({ user }: { user: User }) {
+function AppsPageContent({ user: _user }: { user: User }) {
   const [toolkits, setToolkits] = useState<ConnectedToolkit[]>([]);
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([]);
   const [loading, setLoading] = useState(true);
@@ -357,7 +357,7 @@ function AppsPageContent({ user }: { user: User }) {
 
   return (
     <div className="flex-1 flex flex-col" style={{ backgroundColor: '#fcfaf9' }}>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pb-8">
         <div className="max-w-6xl mx-auto px-3 py-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-8 gap-3 sm:gap-4">
             <h1 className="text-lg sm:text-2xl font-semibold text-neutral-700">Your Apps</h1>
@@ -384,7 +384,7 @@ function AppsPageContent({ user }: { user: User }) {
             </button>
           </div>
 
-          <div className="bg-white rounded-lg sm:rounded-xl border border-stone-200 mb-6" style={{ boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)' }}>
+          <div className="bg-white rounded-lg sm:rounded-xl border border-stone-200 mb-32" style={{ boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)' }}>
             {filteredToolkits.length === 0 ? (
               <div className="p-6 sm:p-12 text-center">
                 <div className="text-neutral-500 text-sm sm:text-base">No toolkits found</div>

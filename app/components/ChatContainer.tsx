@@ -166,37 +166,36 @@ export function ChatContainer({ user: _user }: ChatContainerProps) {
         onSelectConversation={loadConversationMessages}
         onNewChat={startNewChat}
         sidebarOpen={sidebarOpen}
+        onToggleSidebar={setSidebarOpen}
       />
 
-      {/* Main content */}
-      <div
-        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
-          sidebarOpen ? 'ml-80' : 'ml-0'
-        }`}
-      >
-        {/* Sidebar toggle button */}
-        <div className="p-6 pb-0">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 rounded"
+      {/* Sidebar toggle button - always visible */}
+      <div className="fixed top-[120px] left-4 z-40">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 hover:bg-gray-100 rounded"
+          aria-label="Toggle sidebar"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-gray-900"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-gray-900"
-            >
-              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-              <line x1="9" x2="9" y1="3" y2="21" />
-            </svg>
-          </button>
-        </div>
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+            <line x1="9" x2="9" y1="3" y2="21" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col">
 
         {/* Welcome screen or chat messages */}
         <div className="flex-1 flex flex-col overflow-hidden">

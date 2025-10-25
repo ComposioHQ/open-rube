@@ -53,7 +53,7 @@ export function MessageInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="m-1 w-full resize-none border-0 bg-transparent px-2 sm:px-3 py-2 text-sm sm:text-base leading-relaxed text-gray-900 focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
+          className="font-inter m-1 w-full resize-none border-0 bg-transparent px-2 sm:px-3 py-2 text-sm sm:text-base leading-relaxed text-gray-900 focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
           placeholder={displayPlaceholder}
         />
       </div>

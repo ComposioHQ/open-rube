@@ -15,6 +15,7 @@ interface ChatSidebarProps {
   onSelectConversation: (id: string) => void;
   onNewChat: () => void;
   sidebarOpen: boolean;
+  onToggleSidebar: (open: boolean) => void;
 }
 
 export function ChatSidebar({
@@ -23,6 +24,7 @@ export function ChatSidebar({
   onSelectConversation,
   onNewChat,
   sidebarOpen,
+  onToggleSidebar,
 }: ChatSidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -32,15 +34,36 @@ export function ChatSidebar({
 
   return (
     <div
-      className={`fixed left-0 top-[120px] h-full w-80 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out z-50 ${
+      className={`fixed left-0 top-[120px] h-[calc(100vh-120px)] w-80 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out z-50 flex flex-col ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-900">Chat History</h2>
+        <button
+          onClick={() => onToggleSidebar(false)}
+          className="p-1 hover:bg-gray-100 rounded"
+          aria-label="Close sidebar"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-gray-600"
+          >
+            <path d="M18 6l-12 12" />
+            <path d="M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
-      <div className="p-4">
+      <div className="p-4 flex-shrink-0">
         <button
           onClick={onNewChat}
           className="w-full flex items-center gap-2 p-3 text-left hover:bg-gray-50 rounded-lg border border-gray-200 mb-3"
@@ -89,7 +112,7 @@ export function ChatSidebar({
         </div>
       </div>
 
-      <div className="px-4">
+      <div className="flex-1 overflow-y-auto px-4">
         {filteredConversations.length > 0 ? (
           <div className="mb-4">
             <p className="text-xs font-medium text-gray-500 mb-2">Recent</p>

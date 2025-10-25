@@ -15,7 +15,7 @@ function HomeContent() {
 
   useEffect(() => {
     const tab = searchParams.get('tab')
-    if (tab && ['chat', 'apps', 'activity', 'settings'].includes(tab)) {
+    if (tab && ['chat', 'apps'].includes(tab)) {
       setActiveTab(tab)
     }
   }, [searchParams])
@@ -26,28 +26,6 @@ function HomeContent() {
         return <ChatPage />;
       case 'apps':
         return <AppsPage />;
-      case 'activity':
-        return (
-          <div className="flex-1 p-6">
-            <div className="max-w-6xl mx-auto">
-              <h1 className="text-2xl font-semibold text-gray-900 mb-6">Activity Logs</h1>
-              <div className="bg-white rounded-lg shadow p-6">
-                <p className="text-gray-500">Your activity logs will appear here.</p>
-              </div>
-            </div>
-          </div>
-        );
-      case 'settings':
-        return (
-          <div className="flex-1 p-6">
-            <div className="max-w-6xl mx-auto">
-              <h1 className="text-2xl font-semibold text-gray-900 mb-6">Settings</h1>
-              <div className="bg-white rounded-lg shadow p-6">
-                <p className="text-gray-500">Settings options will appear here.</p>
-              </div>
-            </div>
-          </div>
-        );
       default:
         return <ChatPage />;
     }
@@ -56,8 +34,9 @@ function HomeContent() {
   return (
     <AuthWrapper>
       {(user) => (
-        <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#fcfaf9' }}>
-          <header className="bg-white border-b border-gray-200">
+        <div className="flex flex-col h-screen" style={{ backgroundColor: '#fcfaf9' }}>
+          {/* Fixed Header */}
+          <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-30">
             <div className="flex items-center justify-between px-6 py-4">
               <div className="flex items-center space-x-3 text-black">
                 <RubeGraphic />
@@ -67,8 +46,9 @@ function HomeContent() {
             </div>
             <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
           </header>
-          
-          <main className="flex-1 flex flex-col">
+
+          {/* Main content with top padding to account for fixed header */}
+          <main className="flex-1 flex flex-col pt-[120px]">
             {renderContent()}
           </main>
         </div>

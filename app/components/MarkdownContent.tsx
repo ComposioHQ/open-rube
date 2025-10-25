@@ -13,7 +13,7 @@ interface MarkdownContentProps {
  */
 export function MarkdownContent({ content }: MarkdownContentProps) {
   return (
-    <div className="prose prose-sm max-w-none text-black prose-headings:text-black prose-strong:text-black prose-code:text-black prose-pre:bg-gray-100 prose-a:text-blue-600 prose-a:underline prose-a:font-normal hover:prose-a:text-blue-800">
+    <div className="font-inter prose prose-sm max-w-none text-black prose-headings:text-black prose-strong:text-black prose-code:text-black prose-pre:bg-gray-100 prose-a:text-blue-600 prose-a:underline prose-a:font-normal hover:prose-a:text-blue-800">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{

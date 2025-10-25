@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-
 interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -11,8 +9,6 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   const tabs = [
     { id: 'chat', label: 'Chat' },
     { id: 'apps', label: 'Apps' },
-    { id: 'activity', label: 'Activity Logs' },
-    { id: 'settings', label: 'Settings' },
   ];
 
   return (
