@@ -4,18 +4,20 @@ import { openai } from '@ai-sdk/openai';
 import { experimental_createMCPClient as createMCPClient } from 'ai';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { createClient } from '@/app/utils/supabase/server';
-import { 
-  createConversation, 
-  addMessage, 
+import {
+  createConversation,
+  addMessage,
   generateConversationTitle
 } from '@/app/utils/chat-history';
 import { getComposio } from "@/app/utils/composio";
+import { logger } from '@/app/utils/logger';
+
+type MCPTools = Awaited<ReturnType<Awaited<ReturnType<typeof createMCPClient>>['tools']>>;
 
 interface MCPSessionCache {
   session: { url: string; sessionId: string };
   client: Awaited<ReturnType<typeof createMCPClient>>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tools: any;
+  tools: MCPTools;
 }
 
 // Session cache to store MCP sessions per chat session per user
@@ -52,7 +54,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Authenticated user:', { id: user.id, email: userEmail });
+    logger.info('User authenticated', { userId: user.id });
 
     let currentConversationId = conversationId;
     const latestMessage = messages[messages.length - 1];
@@ -79,7 +81,7 @@ export async function POST(request: NextRequest) {
       'user'
     );
 
-    console.log('🚀 Starting Tool Router Agent execution...');
+    logger.info('Starting Tool Router Agent execution', { conversationId: currentConversationId });
 
     // Create a unique session key based on user and conversation
     const sessionKey = `${user.id}-${currentConversationId}`;
@@ -88,12 +90,12 @@ export async function POST(request: NextRequest) {
 
     // Check if we have a cached session for this chat
     if (sessionCache.has(sessionKey)) {
-      console.log('♻️ Reusing existing MCP session');
+      logger.debug('Reusing existing MCP session', { sessionKey });
       const cached = sessionCache.get(sessionKey)!;
       mcpClient = cached.client;
       tools = cached.tools;
     } else {
-      console.log('🆕 Creating new MCP session');
+      logger.info('Creating new MCP session', { sessionKey });
       const composio = getComposio();
 
       // Access the experimental ToolRouter for specific toolkits
@@ -101,7 +103,7 @@ export async function POST(request: NextRequest) {
         toolkits: []
       });
       const url = new URL(mcpSession.url);
-      console.log(`🔗 Session URL: ${url}`);
+      logger.debug('MCP session created', { sessionId: mcpSession.sessionId, url: url.toString() });
 
       mcpClient = await createMCPClient({
         transport: new StreamableHTTPClientTransport(url, {
@@ -138,17 +140,37 @@ export async function POST(request: NextRequest) {
           `,
       messages: messages,
       stopWhen: stepCountIs(50),
-      onStepFinish: (event) => {
-        console.log('Step finished:', event);
+      onStepFinish: () => {
+        logger.debug('AI step completed');
       },
       onFinish: async (event) => {
         // Save assistant response to database when streaming finishes
-        await addMessage(
-          currentConversationId,
-          user.id,
-          event.text,
-          'assistant'
-        );
+        try {
+          const result = await addMessage(
+            currentConversationId,
+            user.id,
+            event.text,
+            'assistant'
+          );
+
+          if (!result) {
+            logger.warn('Failed to save assistant message to database', {
+              conversationId: currentConversationId,
+              userId: user.id,
+              textLength: event.text.length
+            });
+          } else {
+            logger.debug('Assistant message saved to database', {
+              conversationId: currentConversationId,
+              messageLength: event.text.length
+            });
+          }
+        } catch (error) {
+          logger.error('Error saving assistant message', error, {
+            conversationId: currentConversationId,
+            userId: user.id
+          });
+        }
       },
     });
 
@@ -159,9 +181,9 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error in chat endpoint:', error);
+    logger.error('Error in chat endpoint', error);
     return NextResponse.json(
-      { error: 'Failed to process chat request' }, 
+      { error: 'Failed to process chat request' },
       { status: 500 }
     );
   }
