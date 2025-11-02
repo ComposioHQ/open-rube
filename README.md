@@ -1,6 +1,9 @@
 # Open Rube
 
-An open-source implementation of [Rube](https://rube.app), empowering AI agents to interact with 500+ applications directly within your chat interface.
+An open-source implementation of [Rube](https://rube.app) built with [Composio](https://composio.dev?utm_source=github&utm_medium=readme&utm_campaign=open-rube), empowering AI agents to interact with 500+ applications directly within your chat interface.
+
+![Open Rube Demo](public/open-rube.gif)
+
 
 ## What is Rube?
 

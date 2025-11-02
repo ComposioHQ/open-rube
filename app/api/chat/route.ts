@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { streamText, stepCountIs, tool } from 'ai';
+import { streamText, stepCountIs, tool, Tool } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { experimental_createMCPClient as createMCPClient } from '@ai-sdk/mcp';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
@@ -13,12 +13,12 @@ import {
 import { getComposio } from "@/app/utils/composio";
 import { logger } from '@/app/utils/logger';
 
-type MCPTools = Awaited<ReturnType<Awaited<ReturnType<typeof createMCPClient>>['tools']>>;
+type ToolsRecord = Record<string, Tool>;
 
 interface MCPSessionCache {
   session: { url: string; sessionId: string };
   client: Awaited<ReturnType<typeof createMCPClient>>;
-  tools: MCPTools;
+  tools: ToolsRecord;
 }
 
 // Session cache to store MCP sessions per chat session per user
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Create a unique session key based on user and conversation
     const sessionKey = `${user.id}-${currentConversationId}`;
     
-    let mcpClient, tools;
+    let mcpClient: Awaited<ReturnType<typeof createMCPClient>>, tools: ToolsRecord;
 
     // Check if we have a cached session for this chat
     if (sessionCache.has(sessionKey)) {
@@ -133,7 +133,18 @@ export async function POST(request: NextRequest) {
             authConfigId: z.string().optional().describe('The auth config ID to use after collecting inputs'),
             logoUrl: z.string().optional().describe('URL to the provider logo/icon')
           }),
-          execute: async ({ provider, fields, authConfigId, logoUrl }) => {
+          execute: async ({ provider, fields, authConfigId, logoUrl }: {
+            provider: string;
+            fields: Array<{
+              name: string;
+              label: string;
+              type?: string;
+              required?: boolean;
+              placeholder?: string;
+            }>;
+            authConfigId?: string;
+            logoUrl?: string;
+          }) => {
             // Return a special marker that the frontend will detect
             return {
               type: 'user_input_request',
