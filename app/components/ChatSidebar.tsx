@@ -14,6 +14,7 @@ interface ChatSidebarProps {
   currentConversationId: string | null;
   onSelectConversation: (id: string) => void;
   onNewChat: () => void;
+  onDeleteConversation: (id: string) => void;
   sidebarOpen: boolean;
   onToggleSidebar: (open: boolean) => void;
 }
@@ -23,6 +24,7 @@ export function ChatSidebar({
   currentConversationId,
   onSelectConversation,
   onNewChat,
+  onDeleteConversation,
   sidebarOpen,
   onToggleSidebar,
 }: ChatSidebarProps) {
@@ -120,14 +122,43 @@ export function ChatSidebar({
               {filteredConversations.map(conversation => (
                 <div
                   key={conversation.id}
-                  onClick={() => onSelectConversation(conversation.id)}
-                  className={`p-2 hover:bg-gray-50 rounded cursor-pointer ${
+                  className={`group flex items-center justify-between p-2 hover:bg-gray-50 rounded ${
                     currentConversationId === conversation.id ? 'bg-gray-100' : ''
                   }`}
                 >
-                  <p className="text-sm text-gray-700 truncate">
-                    {conversation.title || 'Untitled Chat'}
-                  </p>
+                  <div
+                    onClick={() => onSelectConversation(conversation.id)}
+                    className="flex-1 cursor-pointer min-w-0"
+                  >
+                    <p className="text-sm text-gray-700 truncate">
+                      {conversation.title || 'Untitled Chat'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteConversation(conversation.id);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-200 rounded transition-opacity"
+                    aria-label="Delete conversation"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-gray-500"
+                    >
+                      <path d="M3 6h18" />
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                    </svg>
+                  </button>
                 </div>
               ))}
             </div>

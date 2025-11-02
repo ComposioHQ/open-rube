@@ -29,35 +29,17 @@ body {
 }
 
 .input-bar {
-  -webkit-text-size-adjust: 100%;
-  tab-size: 4;
-  font-feature-settings: normal;
-  font-variation-settings: normal;
-  -webkit-tap-highlight-color: transparent;
-  line-height: inherit;
-  color: hsl(var(--foreground));
-  font-family: __Inter_f367f3,__Inter_Fallback_f367f3;
-  font-style: normal;
-  box-sizing: border-box;
-  border: 0 solid #e5e7eb;
-  scrollbar-width: thin;
-  scrollbar-color: #c9c6c5 transparent;
   display: flex;
   width: 100%;
   flex-direction: column;
   border-radius: 1.5rem;
   border-width: 1px;
-  --tw-border-opacity: 1;
-  border-color: rgb(229 224 223/var(--tw-border-opacity,1));
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 255 255/var(--tw-bg-opacity,1));
+  border-color: rgb(229 224 223);
+  background-color: rgb(255 255 255);
   padding: .75rem;
-  --tw-shadow: 0 1px 2px 0 rgba(0,0,0,.05);
-  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow);
-  transform: none;
-  transform-origin: 50% 50% 0px;
-  opacity: 1;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,.05);
+  scrollbar-width: thin;
+  scrollbar-color: #c9c6c5 transparent;
 }
 
 .usecase-card {

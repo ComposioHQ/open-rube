@@ -9,11 +9,20 @@ import { ChatWelcome } from './ChatWelcome';
 import { MessageInput } from './MessageInput';
 import { useConversations } from '@/app/hooks/useConversations';
 
+interface ToolCall {
+  id: string;
+  name: string;
+  input: Record<string, unknown>;
+  output?: unknown;
+  status: 'running' | 'completed' | 'error';
+}
+
 interface Message {
   id: string;
   content: string;
   sender: 'user' | 'assistant';
   timestamp: Date;
+  toolCalls?: ToolCall[];
 }
 
 interface ChatContainerProps {
@@ -27,7 +36,7 @@ export function ChatContainer({ user: _user }: ChatContainerProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [streamingContent, setStreamingContent] = useState('');
-  const [currentStreamingId, setCurrentStreamingId] = useState<string | null>(null);
+  const [streamingToolCalls, setStreamingToolCalls] = useState<ToolCall[]>([]);
 
   const { conversations, loadConversations } = useConversations();
 
@@ -67,6 +76,42 @@ export function ChatContainer({ user: _user }: ChatContainerProps) {
     setMessages([]);
     setCurrentConversationId(null);
     setInputValue('');
+  };
+
+  const handleOAuthInputSubmit = async (values: Record<string, string>) => {
+    // Send the collected values back as a message to continue the flow
+    const inputSummary = Object.entries(values)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(', ');
+
+    await handleSendMessage(`I've provided the following inputs: ${inputSummary}. Please proceed with the connection.`);
+  };
+
+  const handleDeleteConversation = async (conversationId: string) => {
+    if (!confirm('Are you sure you want to delete this conversation?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // If we deleted the current conversation, start a new chat
+        if (conversationId === currentConversationId) {
+          startNewChat();
+        }
+        // Reload conversations list
+        loadConversations();
+      } else {
+        console.error('Failed to delete conversation');
+        alert('Failed to delete conversation');
+      }
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      alert('Error deleting conversation');
+    }
   };
 
   const handleSendMessage = async (message: string) => {
@@ -111,32 +156,87 @@ export function ChatContainer({ user: _user }: ChatContainerProps) {
 
       const reader = chatResponse.body?.getReader();
       const decoder = new TextDecoder();
-      const streamingId = nanoid();
-      setCurrentStreamingId(streamingId);
 
       let fullContent = '';
+      const toolCallsMap = new Map<string, ToolCall>();
+      let buffer = '';
 
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value);
-          fullContent += chunk;
-          setStreamingContent(fullContent);
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (!line.trim() || !line.startsWith('data: ')) continue;
+
+            const data = line.slice(6); // Remove 'data: ' prefix
+            if (data === '[DONE]') continue;
+
+            try {
+              const parsed = JSON.parse(data);
+
+              // Handle text deltas
+              if (parsed.type === 'text-delta') {
+                fullContent += parsed.delta || '';
+                setStreamingContent(fullContent);
+              }
+
+              // Handle tool input start
+              if (parsed.type === 'tool-input-start') {
+                console.log('🚀 tool-input-start event:', parsed);
+                const toolCall: ToolCall = {
+                  id: parsed.toolCallId,
+                  name: parsed.toolName,
+                  input: {},
+                  status: 'running'
+                };
+                console.log('🚀 Created tool call:', toolCall);
+                toolCallsMap.set(parsed.toolCallId, toolCall);
+                setStreamingToolCalls(Array.from(toolCallsMap.values()));
+              }
+
+              // Handle tool input available (complete arguments)
+              if (parsed.type === 'tool-input-available') {
+                const existingTool = toolCallsMap.get(parsed.toolCallId);
+                if (existingTool) {
+                  existingTool.input = parsed.input || {};
+                  toolCallsMap.set(parsed.toolCallId, existingTool);
+                  setStreamingToolCalls(Array.from(toolCallsMap.values()));
+                }
+              }
+
+              // Handle tool output available
+              if (parsed.type === 'tool-output-available') {
+                const existingTool = toolCallsMap.get(parsed.toolCallId);
+                if (existingTool) {
+                  existingTool.output = parsed.output;
+                  existingTool.status = 'completed';
+                  toolCallsMap.set(parsed.toolCallId, existingTool);
+                  setStreamingToolCalls(Array.from(toolCallsMap.values()));
+                }
+              }
+            } catch (e) {
+              console.error('Error parsing stream data:', e, 'Line:', line);
+            }
+          }
         }
       }
 
       const assistantMessage: Message = {
-        id: streamingId,
+        id: nanoid(),
         content: fullContent || 'Sorry, I could not process your request.',
         sender: 'assistant',
-        timestamp: new Date()
+        timestamp: new Date(),
+        toolCalls: Array.from(toolCallsMap.values())
       };
 
       setMessages(prev => [...prev, assistantMessage]);
       setStreamingContent('');
-      setCurrentStreamingId(null);
+      setStreamingToolCalls([]);
     } catch (error) {
       console.error('Error calling chat API:', error);
 
@@ -149,7 +249,6 @@ export function ChatContainer({ user: _user }: ChatContainerProps) {
 
       setMessages(prev => [...prev, errorMessage]);
       setStreamingContent('');
-      setCurrentStreamingId(null);
     } finally {
       setIsLoading(false);
     }
@@ -165,6 +264,7 @@ export function ChatContainer({ user: _user }: ChatContainerProps) {
         currentConversationId={currentConversationId}
         onSelectConversation={loadConversationMessages}
         onNewChat={startNewChat}
+        onDeleteConversation={handleDeleteConversation}
         sidebarOpen={sidebarOpen}
         onToggleSidebar={setSidebarOpen}
       />
@@ -211,7 +311,8 @@ export function ChatContainer({ user: _user }: ChatContainerProps) {
               messages={messages}
               isLoading={isLoading}
               streamingContent={streamingContent}
-              currentStreamingId={currentStreamingId}
+              streamingToolCalls={streamingToolCalls}
+              onOAuthInputSubmit={handleOAuthInputSubmit}
             />
           )}
         </div>
